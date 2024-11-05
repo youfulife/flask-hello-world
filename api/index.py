@@ -9,8 +9,13 @@ app = Flask(__name__)
 WECHAT_WEBHOOK_URL = 'https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=cd0e17a9-ecfe-4a2d-942e-4bcf873cb76c'
 
 # 配置日志记录
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
+log_level = 'INFO'
+logger = logging.getLogger()
+logger.setLevel(log_level)
+
+console_handler = logging.StreamHandler()
+console_handler.setLevel(log_level)
+logger.addHandler(console_handler)
 
 @app.route('/')
 def home():
@@ -23,7 +28,7 @@ def about():
 @app.route('/alert', methods=['POST'])
 def alert():
     # 获取阿里云云监控的告警消息
-    alert_data = request.json
+    alert_data = request.data
     logger.info(f"Received alert: {alert_data}")
 
 
@@ -38,7 +43,7 @@ def send_to_wechat(alert_data):
     wechat_message = {
         "msgtype": "markdown",
         "markdown": {
-            "content": f"**告警信息**\n\n**告警名称:** {alert_data['alertName']}\n**告警级别:** {alert_data['severity']}\n**告警详情:** {alert_data['alertDescription']}"
+            "content": alert_data
         }
     }
 
